@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-container {
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .bill-container {
+            flex: 2;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            cursor: pointer;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        li:hover {
+            background-color: #ccc;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .total {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .input-wrapper {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="menu-container">
+            <h1>Menu</h1>
+            <ul id="menu">
+                <li onclick="toggleOrder('Burger', 50)">Burger - ₹50</li>
+                <li onclick="toggleOrder('Pizza', 200)">Pizza - ₹200</li>
+                <li onclick="toggleOrder('Sandwich', 30)">Sandwich - ₹30</li>
+                <li onclick="toggleOrder('French Fries', 40)">French Fries - ₹40</li>
+                <li onclick="toggleOrder('Coke', 20)">Coke - ₹20</li>
+            </ul>
+        </div>
+        <div class="bill-container">
+            <h1>Bill</h1>
+            <div class="input-wrapper">
+                <label for="customerName">Customer Name:</label>
+                <input type="text" id="customerName">
+            </div>
+            <table id="billTable">
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Price (₹)</th>
+                    <th>Total (₹)</th>
+                </tr>
+            </table>
+            <div class="input-wrapper">
+                <label for="discount">Discount (%):</label>
+                <input type="number" id="discount" min="0" value="0">
+            </div>
+            <div class="input-wrapper">
+                <label for="tax">Tax (%):</label>
+                <input type="number" id="tax" min="0" value="0">
+            </div>
+            <div class="total" id="totalAmount"></div>
+            <button id="generateButton" onclick="generateBill()" disabled>Generate Bill</button>
+        </div>
+    </div>
+
+    <script>
+        var orderedItems = {};
+
+        function toggleOrder(itemName, price) {
+            if (!orderedItems[itemName]) {
+                orderedItems[itemName] = { price: price, quantity: 1 };
+            } else {
+                orderedItems[itemName].quantity++;
+            }
+
+            displayOrderedItems();
+            document.getElementById("generateButton").disabled = false;
+        }
+
+        function displayOrderedItems() {
+            var billTable = document.getElementById("billTable");
+            var totalAmountDisplay = document.getElementById("totalAmount");
+            var totalAmount = 0;
+
+            billTable.innerHTML = "<tr><th>Item</th><th>Quantity</th><th>Price (₹)</th><th>Total (₹)</th></tr>";
+
+            for (var item in orderedItems) {
+                var row = billTable.insertRow(-1);
+                var itemName = row.insertCell(0);
+                var itemQuantity = row.insertCell(1);
+                var itemPrice = row.insertCell(2);
+                var itemTotal = row.insertCell(3);
+                itemName.innerHTML = item;
+                itemQuantity.innerHTML = orderedItems[item].quantity;
+                itemPrice.innerHTML = "₹" + orderedItems[item].price;
+                var total = orderedItems[item].price * orderedItems[item].quantity;
+                itemTotal.innerHTML = "₹" + total;
+                totalAmount += total;
+            }
+
+            totalAmountDisplay.innerHTML = "Total: ₹" + totalAmount.toFixed(2);
+        }
+
+        function generateBill() {
+            var restaurantName = "THE ELITE RESTAURANT";
+            var customerName = document.getElementById("customerName").value;
+            var discount = parseFloat(document.getElementById("discount").value) || 0;
+            var tax = parseFloat(document.getElementById("tax").value) || 0;
+            var totalAmount = calculateTotalAmount();
+            var discountAmount = (totalAmount * discount) / 100;
+            var taxAmount = (totalAmount - discountAmount) * (tax / 100);
+            var finalAmount = totalAmount - discountAmount + taxAmount;
+
+            var billDetails = {
+                restaurantName: restaurantName,
+                customerName: customerName,
+                items: orderedItems,
+                discount: discount,
+                tax: tax,
+                totalAmount: totalAmount,
+                discountAmount: discountAmount,
+                taxAmount: taxAmount,
+                finalAmount: finalAmount
+            };
+
+            var url = "bill.html?";
+            for (var item in billDetails.items) {
+                url += encodeURIComponent(item) + "=" + billDetails.items[item].quantity + "&";
+            }
+            url += "restaurantName=" + encodeURIComponent(billDetails.restaurantName) + "&";
+            url += "customerName=" + encodeURIComponent(billDetails.customerName) + "&";
+            url += "discount=" + billDetails.discount + "&";
+            url += "tax=" + billDetails.tax + "&";
+            url += "totalAmount=" + billDetails.totalAmount + "&";
+            url += "discountAmount=" + billDetails.discountAmount + "&";
+            url += "taxAmount=" + billDetails.taxAmount + "&";
+            url += "finalAmount=" + billDetails.finalAmount;
+            window.location.href = url;
+        }
+
+        function calculateTotalAmount() {
+            var totalAmount = 0;
+            for (var item in orderedItems) {
+                totalAmount += orderedItems[item].price * orderedItems[item].quantity;
+            }
+            return totalAmount;
+        }
+    </script>
+</body>
+</html>

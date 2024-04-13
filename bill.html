@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0; /* Light grey background */
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff; /* White container background */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .total {
+            margin-top: 20px;
+            text-align: right;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bill</h1>
+        <div class="input-wrapper">
+            <label for="restaurantName">Restaurant Name:</label>
+            <span id="restaurantName"></span>
+        </div>
+        <div class="input-wrapper">
+            <label for="customerName">Customer Name:</label>
+            <span id="customerName"></span>
+        </div>
+        <table id="billTable">
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Amount (₹)</th>
+            </tr>
+        </table>
+        <div class="input-wrapper">
+            <label for="discount">Discount (%):</label>
+            <span id="discount"></span>
+        </div>
+        <div class="input-wrapper">
+            <label for="tax">Tax (%):</label>
+            <span id="tax"></span>
+        </div>
+        <div class="input-wrapper">
+            <label for="totalAmount">Total Amount (₹):</label>
+            <span id="totalAmount"></span>
+        </div>
+        <div class="input-wrapper">
+            <label for="discountAmount">Discount Amount (₹):</label>
+            <span id="discountAmount"></span>
+        </div>
+        <div class="input-wrapper">
+            <label for="taxAmount">Tax Amount (₹):</label>
+            <span id="taxAmount"></span>
+        </div>
+        <div class="input-wrapper">
+            <label for="finalAmount">Final Amount (₹):</label>
+            <span id="finalAmount"></span>
+        </div>
+    </div>
+
+    <script>
+        // Parse query parameters to get bill details
+        var queryParams = new URLSearchParams(window.location.search);
+        var items = {};
+        queryParams.forEach((value, key) => {
+            if (key !== "restaurantName" && key !== "customerName" && key !== "discount" && key !== "tax" && key !== "totalAmount" && key !== "discountAmount" && key !== "taxAmount" && key !== "finalAmount") {
+                items[key] = parseInt(value);
+            }
+        });
+        var restaurantName = decodeURIComponent(queryParams.get("restaurantName"));
+        var customerName = decodeURIComponent(queryParams.get("customerName"));
+        var discount = parseFloat(queryParams.get("discount"));
+        var tax = parseFloat(queryParams.get("tax"));
+        var totalAmount = parseFloat(queryParams.get("totalAmount"));
+        var discountAmount = parseFloat(queryParams.get("discountAmount"));
+        var taxAmount = parseFloat(queryParams.get("taxAmount"));
+        var finalAmount = parseFloat(queryParams.get("finalAmount"));
+
+        // Display bill details
+        document.getElementById("restaurantName").innerHTML = restaurantName;
+        document.getElementById("customerName").innerHTML = customerName;
+
+        var billTable = document.getElementById("billTable");
+        var totalAmountDisplay = document.getElementById("totalAmount");
+        var discountDisplay = document.getElementById("discount");
+        var taxDisplay = document.getElementById("tax");
+        var discountAmountDisplay = document.getElementById("discountAmount");
+        var taxAmountDisplay = document.getElementById("taxAmount");
+        var finalAmountDisplay = document.getElementById("finalAmount");
+        
+        for (var item in items) {
+            var row = billTable.insertRow(-1);
+            var itemName = row.insertCell(0);
+            var itemQuantity = row.insertCell(1);
+            var itemAmount = row.insertCell(2);
+            itemName.innerHTML = decodeURIComponent(item);
+            itemQuantity.innerHTML = items[item];
+            itemAmount.innerHTML = "₹" + (totalAmount / items[item]).toFixed(2);
+        }
+
+        totalAmountDisplay.innerHTML = "₹" + totalAmount.toFixed(2);
+        discountDisplay.innerHTML = discount + "%";
+        taxDisplay.innerHTML = tax + "%";
+        discountAmountDisplay.innerHTML = "₹" + discountAmount.toFixed(2);
+        taxAmountDisplay.innerHTML = "₹" + taxAmount.toFixed(2);
+        finalAmountDisplay.innerHTML = "₹" + finalAmount.toFixed(2);
+    </script>
+</body>
+</html>
